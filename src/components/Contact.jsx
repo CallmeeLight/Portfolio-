@@ -1,0 +1,34 @@
+export default function Contact() {
+  return (
+    <section className="contact section" id="contact">
+      <div className="section-label">05 / CONTACT</div>
+
+      <div className="contact-content">
+        <p className="contact-small">HAVE AN IDEA?</p>
+
+        <h2>
+          Let's build
+          <br />
+          <span>something.</span>
+        </h2>
+
+        <p className="contact-description">
+          I'm always interested in interesting ideas, collaborations
+          and opportunities to build something meaningful.
+        </p>
+
+        <a
+          href="mailto:your-email@example.com"
+          className="email-btn"
+        >
+          Get in touch →
+        </a>
+      </div>
+
+      <footer>
+        <div>LIGHT.</div>
+        <div>© 2026 — Built with React & Three.js</div>
+      </footer>
+    </section>
+  );
+}
