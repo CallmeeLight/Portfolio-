@@ -1,3 +1,9 @@
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
+
 const journey = [
   {
     year: "2026",
@@ -26,28 +32,98 @@ const journey = [
 ];
 
 export default function Journey() {
+  const timelineRef = useRef(null);
+
+useEffect(() => {
+  const timeline = timelineRef.current;
+
+  if (!timeline) return;
+
+  const items = gsap.utils.toArray(".timeline-item");
+
+  gsap.fromTo(
+    timeline,
+    {
+      scaleY: 0
+    },
+    {
+      scaleY: 1,
+      ease: "none",
+      scrollTrigger: {
+        trigger: ".timeline",
+        start: "top 65%",
+        end: "bottom 65%",
+        scrub: true,
+        onUpdate: (self) => {
+          const progress = self.progress;
+
+          items.forEach((item, index) => {
+            const nodeProgress = index / (items.length - 1);
+
+            if (progress >= nodeProgress) {
+              item.classList.add("active");
+            } else {
+              item.classList.remove("active");
+            }
+          });
+        }
+      }
+    }
+  );
+
+  return () => {
+    ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+  };
+}, []);
   return (
     <section className="journey section" id="journey">
       <div className="section-label">04 / JOURNEY</div>
 
-      <h2 className="journey-title">
-        Still <span>becoming.</span>
-      </h2>
+      <div className="journey-heading">
+        <h2>
+          Still
+          <br />
+          <span>becoming.</span>
+        </h2>
+
+        <p>
+          Every project, experiment and challenge
+          adds another piece to the journey.
+        </p>
+      </div>
 
       <div className="timeline">
+        <div className="timeline-track">
+  <div
+    ref={timelineRef}
+    className="timeline-progress"
+  />
+</div>
+
         {journey.map((item, index) => (
-          <div className="timeline-item" key={index}>
+          <article
+  className="timeline-item"
+  key={index}
+  ref={(el) => {
+    if (el) {
+      el.dataset.index = index;
+    }
+  }}
+>
             <div className="timeline-year">{item.year}</div>
 
-            <div className="timeline-line">
-              <div className="timeline-dot" />
+            <div className="timeline-node">
+              <span />
             </div>
 
             <div className="timeline-content">
+              <span className="timeline-index">0{index + 1}</span>
+
               <h3>{item.title}</h3>
+
               <p>{item.description}</p>
             </div>
-          </div>
+          </article>
         ))}
       </div>
     </section>

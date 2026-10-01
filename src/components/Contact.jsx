@@ -1,6 +1,8 @@
 export default function Contact() {
   return (
     <section className="contact section" id="contact">
+      <div className="contact-glow" />
+
       <div className="section-label">05 / CONTACT</div>
 
       <div className="contact-content">
@@ -18,16 +20,26 @@ export default function Contact() {
         </p>
 
         <a
-          href="mailto:your-email@example.com"
+          href="mailto:your-callmelight888@gmail.com"
           className="email-btn"
         >
-          Get in touch →
+          <span>Get in touch</span>
+          <span className="email-arrow">↗</span>
         </a>
       </div>
 
-      <footer>
-        <div>LIGHT.</div>
-        <div>© 2026 — Built with React & Three.js</div>
+      <footer className="contact-footer">
+        <div className="footer-logo">
+          LIGHT<span>.</span>
+        </div>
+
+        <div className="footer-center">
+          AI · CODE · DESIGN
+        </div>
+
+        <div className="footer-copy">
+          © 2026 — Built with React & Three.js
+        </div>
       </footer>
     </section>
   );

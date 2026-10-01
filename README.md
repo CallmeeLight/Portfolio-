@@ -20,9 +20,6 @@ AI-powered academic productivity platform designed to make studying more organiz
 
 A futuristic personal AI assistant concept focused on making everyday tasks, information, and productivity feel more natural.
 
-### Bio Lens AI
-
-A healthcare AI concept for medical report analysis and visual recognition of medical equipment.
 
 ### Medical Equipment Troubleshooter
 

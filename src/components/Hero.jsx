@@ -12,10 +12,7 @@ import gsap from "gsap";
 function Tesseract() {
   const group = useRef();
 
-  const mouse = useRef({
-    x: 0,
-    y: 0,
-  });
+  const mouse = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -33,28 +30,6 @@ function Tesseract() {
     };
   }, []);
 
-  useFrame((state) => {
-    if (!group.current) return;
-
-    const t = state.clock.getElapsedTime();
-
-    // Automatic rotation
-    group.current.rotation.x +=
-      (mouse.current.y * 0.35 - group.current.rotation.x) * 0.02;
-
-    group.current.rotation.y +=
-      (mouse.current.x * 0.35 + t * 0.003 - group.current.rotation.y) * 0.02;
-
-    group.current.rotation.z =
-      Math.sin(t * 0.5) * 0.08;
-
-    // Floating movement
-    group.current.position.y =
-      Math.sin(t * 1.2) * 0.12;
-  });
-
-  /* 16 vertices of a 4D hypercube */
-
   const vertices = [];
 
   for (let i = 0; i < 16; i++) {
@@ -65,25 +40,6 @@ function Tesseract() {
       i & 8 ? 1 : -1,
     ]);
   }
-
-  /* Project 4D → 3D */
-
-  const project = ([x, y, z, w]) => {
-    const distance = 3;
-    const scale = distance / (distance - w);
-
-    return [
-      x * scale,
-      y * scale,
-      z * scale,
-    ];
-  };
-
-  const tesseractVertices = vertices.map((v) => [...v]);
-
-const projected = tesseractVertices.map(project);
-
-  /* Find the 32 edges */
 
   const edges = [];
 
@@ -103,91 +59,125 @@ const projected = tesseractVertices.map(project);
     }
   }
 
+  const edgeLines = useRef([]);
+
+  useFrame((state) => {
+    if (!group.current) return;
+
+    const time = state.clock.getElapsedTime();
+
+    const angleXY = time * 0.35;
+    const angleZW = time * 0.55;
+
+    const cosA = Math.cos(angleXY);
+    const sinA = Math.sin(angleXY);
+
+    const cosB = Math.cos(angleZW);
+    const sinB = Math.sin(angleZW);
+
+    const projected = vertices.map(([x, y, z, w]) => {
+      // 4D rotation: X-Y plane
+      let rx = x * cosA - y * sinA;
+      let ry = x * sinA + y * cosA;
+
+      // 4D rotation: Z-W plane
+      let rz = z * cosB - w * sinB;
+      let rw = z * sinB + w * cosB;
+
+      // 4D → 3D perspective
+      const distance = 4;
+      const scale = distance / (distance - rw);
+
+      return [
+        rx * scale,
+        ry * scale,
+        rz * scale,
+      ];
+    });
+
+    edges.forEach(([a, b], index) => {
+      const line = edgeLines.current[index];
+
+      if (!line) return;
+
+      const positions = line.geometry.attributes.position.array;
+
+      positions[0] = projected[a][0];
+      positions[1] = projected[a][1];
+      positions[2] = projected[a][2];
+
+      positions[3] = projected[b][0];
+      positions[4] = projected[b][1];
+      positions[5] = projected[b][2];
+
+      line.geometry.attributes.position.needsUpdate = true;
+    });
+
+    // Smooth mouse interaction
+    group.current.rotation.x +=
+      (mouse.current.y * 0.25 - group.current.rotation.x) * 0.03;
+
+    group.current.rotation.y +=
+      (mouse.current.x * 0.25 - group.current.rotation.y) * 0.03;
+
+    // Floating movement
+    group.current.position.y =
+      Math.sin(time * 1.2) * 0.12;
+  });
+
   return (
     <group ref={group} scale={0.8}>
-
-      {/* Tesseract edges */}
-
       {edges.map(([a, b], index) => {
-        const start = projected[a];
-        const end = projected[b];
+        const geometry = new THREE.BufferGeometry();
 
-        const points = [
-          new THREE.Vector3(...start),
-          new THREE.Vector3(...end),
-        ];
+        geometry.setAttribute(
+          "position",
+          new THREE.Float32BufferAttribute(
+            [
+              vertices[a][0],
+              vertices[a][1],
+              vertices[a][2],
 
-        const geometry =
-          new THREE.BufferGeometry().setFromPoints(points);
+              vertices[b][0],
+              vertices[b][1],
+              vertices[b][2],
+            ],
+            3
+          )
+        );
+
+        const material = new THREE.LineBasicMaterial({
+          color:
+            index % 2 === 0
+              ? "#ffffff"
+              : "#a78bfa",
+          transparent: true,
+          opacity: 0.85,
+        });
+
+        const line = new THREE.Line(
+          geometry,
+          material
+        );
 
         return (
-          <group key={index}>
-
-            {/* Glow */}
-
-            <primitive
-              object={
-                new THREE.Line(
-                  geometry,
-                  new THREE.LineBasicMaterial({
-                    color: "#8b5cf6",
-                    transparent: true,
-                    opacity: 0.12,
-                  })
-                )
+          <primitive
+            key={index}
+            object={line}
+            ref={(el) => {
+              if (el) {
+                edgeLines.current[index] = el;
               }
-              scale={1.08}
-            />
-
-            {/* Main edge */}
-
-            <primitive
-              object={
-                new THREE.Line(
-                  geometry,
-                  new THREE.LineBasicMaterial({
-                    color:
-                      index % 2 === 0
-                        ? "#ffffff"
-                        : "#a78bfa",
-                    transparent: true,
-                    opacity: 0.9,
-                  })
-                )
-              }
-            />
-
-          </group>
+            }}
+          />
         );
       })}
 
-      {/* Tesseract vertices */}
-
-      {projected.map((position, index) => (
-        <mesh
-          key={index}
-          position={position}
-        >
-          <sphereGeometry args={[0.045, 16, 16]} />
-
-          <meshBasicMaterial
-            color={
-              index % 2 === 0
-                ? "#ffffff"
-                : "#a78bfa"
-            }
-          />
-        </mesh>
-      ))}
-
-      {/* Glow light */}
-
       <pointLight
         color="#8b5cf6"
-        intensity={3}
-        distance={5}
+        intensity={4}
+        distance={6}
       />
-
     </group>
   );
 }
@@ -278,19 +268,13 @@ export default function Hero() {
 
       <div className="hero-buttons">
 
-        <a
-          href="#projects"
-          className="primary-btn"
-        >
-          Explore my work →
-        </a>
+        <a href="#projects" className="primary-btn magnetic">
+  Explore my work →
+</a>
 
-        <a
-          href="#contact"
-          className="secondary-btn"
-        >
-          Contact me
-        </a>
+<a href="#contact" className="secondary-btn magnetic">
+  Contact me
+</a>
 
       </div>
 
