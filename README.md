@@ -1,16 +1,129 @@
-# React + Vite
+# LIGHT — Personal Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+> **Intelligence, made personal.**
 
-Currently, two official plugins are available:
+A futuristic personal portfolio built to showcase my work, experiments, skills, and journey across **AI, software development, UI/UX, and healthcare technology**.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## ✦ About
 
-## React Compiler
+I'm Light — a developer and UI/UX enthusiast exploring the intersection of **artificial intelligence, technology, and design**.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+I enjoy turning ideas into useful digital experiences, from AI assistants and productivity platforms to healthcare-focused technology concepts.
 
-## Expanding the Oxlint configuration
+## 🚀 Featured Projects
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+### Study to Shine
+
+AI-powered academic productivity platform designed to make studying more organized and productive.
+
+### NOVA
+
+A futuristic personal AI assistant concept focused on making everyday tasks, information, and productivity feel more natural.
+
+### Bio Lens AI
+
+A healthcare AI concept for medical report analysis and visual recognition of medical equipment.
+
+### Medical Equipment Troubleshooter
+
+An AI-powered concept for identifying medical equipment and helping users understand common issues, basic checks, and safety considerations.
+
+### College Copilot
+
+An academic productivity assistant designed to bring schedules, deadlines, tasks, academic information, and productivity tools into one place.
+
+## 🛠️ Tech Stack
+
+* React
+* JavaScript
+* HTML
+* CSS
+* Three.js
+* React Three Fiber
+* Drei
+* GSAP
+* APIs
+* Firebase
+
+## 🎨 Design
+
+The portfolio focuses on a **minimal futuristic aesthetic** with:
+
+* Interactive 3D elements
+* Glass-inspired UI
+* Smooth animations
+* Scroll-based interactions
+* Cursor effects
+* Responsive layouts
+* Micro-interactions
+
+## 📂 Project Structure
+
+```text
+light-portfolio/
+├── public/
+├── src/
+│   ├── components/
+│   │   ├── Hero.jsx
+│   │   ├── Navbar.jsx
+│   │   ├── About.jsx
+│   │   ├── Skills.jsx
+│   │   ├── Projects.jsx
+│   │   ├── Journey.jsx
+│   │   ├── Contact.jsx
+│   │   ├── CursorGlow.jsx
+│   │   └── ParticleField.jsx
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── index.css
+├── package.json
+└── vite.config.js
+```
+
+## ⚡ Run Locally
+
+Clone the repository:
+
+```bash
+git clone <https://github.com/CallmeeLight/Portfolio-.git>
+cd light-portfolio
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Create a production build:
+
+```bash
+npm run build
+```
+
+## 🌐 Deployment
+
+The portfolio is designed to be deployed with **Vercel**.
+
+Every update can be pushed to GitHub and automatically deployed to the live website.
+
+## 🧭 Journey
+
+Currently exploring:
+
+**AI → Software → UI/UX → Healthcare Technology → Building Products**
+
+This portfolio is a work in progress — continuously evolving as I learn, build, and experiment.
+
+---
+
+### Built with curiosity, code & AI.
+
+**LIGHT.**
+
