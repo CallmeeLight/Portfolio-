@@ -1,3 +1,4 @@
+import F1Car from "./F1Car";
 import { useRef, useEffect } from "react";
 import ParticleField from "./ParticleField";
 import { Canvas, useFrame } from "@react-three/fiber";
@@ -281,7 +282,13 @@ export default function Hero() {
       {/* 3D Tesseract */}
 
       <div className="orb">
-        <Canvas camera={{ position: [0, 0, 5] }}>
+        <Canvas
+  camera={{
+    position: [0, 0, 5],
+    fov: 45
+  }}
+  gl={{ alpha: true }}
+>
 
           <ambientLight intensity={0.4} />
 
@@ -293,12 +300,12 @@ export default function Hero() {
           <ParticleField />
 
           <Float
-            speed={1.5}
-            rotationIntensity={0.3}
-            floatIntensity={0.5}
-          >
-            <Tesseract />
-          </Float>
+  speed={1.2}
+  rotationIntensity={0.15}
+  floatIntensity={0.25}
+>
+  <F1Car />
+</Float>
 
           <Particles />
 
