@@ -1,8 +1,16 @@
 import F1Car from "./F1Car";
-import { useRef, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import ParticleField from "./ParticleField";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, OrbitControls, Points, PointMaterial } from "@react-three/drei";
+import {
+  Canvas,
+  useFrame,
+  useThree,
+} from "@react-three/fiber";
+import {
+  OrbitControls,
+  Points,
+  PointMaterial,
+} from "@react-three/drei";
 import * as THREE from "three";
 import gsap from "gsap";
 
@@ -12,7 +20,6 @@ import gsap from "gsap";
 
 function Tesseract() {
   const group = useRef();
-
   const mouse = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -77,15 +84,12 @@ function Tesseract() {
     const sinB = Math.sin(angleZW);
 
     const projected = vertices.map(([x, y, z, w]) => {
-      // 4D rotation: X-Y plane
       let rx = x * cosA - y * sinA;
       let ry = x * sinA + y * cosA;
 
-      // 4D rotation: Z-W plane
       let rz = z * cosB - w * sinB;
       let rw = z * sinB + w * cosB;
 
-      // 4D → 3D perspective
       const distance = 4;
       const scale = distance / (distance - rw);
 
@@ -101,7 +105,8 @@ function Tesseract() {
 
       if (!line) return;
 
-      const positions = line.geometry.attributes.position.array;
+      const positions =
+        line.geometry.attributes.position.array;
 
       positions[0] = projected[a][0];
       positions[1] = projected[a][1];
@@ -114,14 +119,16 @@ function Tesseract() {
       line.geometry.attributes.position.needsUpdate = true;
     });
 
-    // Smooth mouse interaction
     group.current.rotation.x +=
-      (mouse.current.y * 0.25 - group.current.rotation.x) * 0.03;
+      (mouse.current.y * 0.25 -
+        group.current.rotation.x) *
+      0.03;
 
     group.current.rotation.y +=
-      (mouse.current.x * 0.25 - group.current.rotation.y) * 0.03;
+      (mouse.current.x * 0.25 -
+        group.current.rotation.y) *
+      0.03;
 
-    // Floating movement
     group.current.position.y =
       Math.sin(time * 1.2) * 0.12;
   });
@@ -147,14 +154,15 @@ function Tesseract() {
           )
         );
 
-        const material = new THREE.LineBasicMaterial({
-          color:
-            index % 2 === 0
-              ? "#ffffff"
-              : "#a78bfa",
-          transparent: true,
-          opacity: 0.85,
-        });
+        const material =
+          new THREE.LineBasicMaterial({
+            color:
+              index % 2 === 0
+                ? "#ffffff"
+                : "#a78bfa",
+            transparent: true,
+            opacity: 0.85,
+          });
 
         const line = new THREE.Line(
           geometry,
@@ -217,11 +225,92 @@ function Particles() {
 }
 
 /* =========================
+   SCROLL CAR
+========================= */
+
+function ScrollCar({ progress }) {
+  const group = useRef();
+
+  useFrame(() => {
+    if (!group.current) return;
+
+    const targetY = -progress * 2.8;
+    const targetX = progress * 1.2;
+    const targetZ = progress * -1.2;
+
+    group.current.position.y +=
+      (targetY - group.current.position.y) * 0.08;
+
+    group.current.position.x +=
+      (targetX - group.current.position.x) * 0.08;
+
+    group.current.position.z +=
+      (targetZ - group.current.position.z) * 0.08;
+
+    const targetRotationY = progress * 0.7;
+
+    group.current.rotation.y +=
+      (targetRotationY - group.current.rotation.y) * 0.08;
+
+    const targetScale = 1 - progress * 0.35;
+
+    const currentScale =
+      group.current.scale.x +
+      (targetScale - group.current.scale.x) * 0.08;
+
+    group.current.scale.setScalar(currentScale);
+  });
+
+  return (
+    <group ref={group}>
+      <F1Car />
+    </group>
+  );
+}
+
+
+/* =========================
+   SCENE
+========================= */
+
+function Scene({ scrollProgress }) {
+  return (
+    <>
+      <ambientLight intensity={0.4} />
+
+      <pointLight
+        position={[3, 3, 3]}
+        intensity={15}
+      />
+
+      <ParticleField />
+
+      <ScrollCar progress={scrollProgress} />
+
+      <Particles />
+
+      <OrbitControls
+        enableZoom={false}
+        enablePan={false}
+      />
+
+    </>
+  );
+}
+
+
+/* =========================
    HERO
 ========================= */
 
 export default function Hero() {
   const heroText = useRef();
+  const hero = useRef();
+
+    const [scrollProgress, setScrollProgress] =
+  React.useState(0);
+
+  /* HERO INTRO */
 
   useEffect(() => {
     if (!heroText.current) return;
@@ -242,10 +331,52 @@ export default function Hero() {
     );
   }, []);
 
-  return (
-    <section className="hero">
+  /* =========================
+     CINEMATIC SCROLL
+  ========================= */
 
-      {/* Hero Text */}
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!hero.current) return;
+
+      const rect =
+        hero.current.getBoundingClientRect();
+
+      const progress = THREE.MathUtils.clamp(
+        -rect.top / window.innerHeight,
+        0,
+        1
+      );
+
+      setScrollProgress(progress);
+
+    };
+
+    window.addEventListener(
+      "scroll",
+      handleScroll,
+      { passive: true }
+    );
+
+    handleScroll();
+
+    return () => {
+      window.removeEventListener(
+        "scroll",
+        handleScroll
+      );
+    };
+  }, []);
+
+  return (
+    <section
+  id="home"
+  className="hero"
+  ref={hero}
+>
+      {/* =========================
+          HERO TEXT
+      ========================= */}
 
       <div
         className="hero-text"
@@ -260,63 +391,53 @@ export default function Hero() {
         </h1>
 
         <p className="subtitle">
-          I build intelligent digital experiences where AI,
-          code and design come together.
+          I build intelligent digital experiences
+          where AI, code and design come together.
         </p>
       </div>
 
-      {/* Buttons */}
+      {/* =========================
+          BUTTONS
+      ========================= */}
 
       <div className="hero-buttons">
+        <a
+          href="#projects"
+          className="primary-btn magnetic"
+        >
+          Explore my work →
+        </a>
 
-        <a href="#projects" className="primary-btn magnetic">
-  Explore my work →
-</a>
-
-<a href="#contact" className="secondary-btn magnetic">
-  Contact me
-</a>
-
+        <a
+          href="#contact"
+          className="secondary-btn magnetic"
+        >
+          Contact me
+        </a>
       </div>
 
-      {/* 3D Tesseract */}
+      {/* =========================
+          NORMAL 3D SCENE
+      ========================= */}
 
       <div className="orb">
         <Canvas
-  camera={{
-    position: [0, 0, 5],
-    fov: 45
-  }}
-  gl={{ alpha: true }}
->
-
-          <ambientLight intensity={0.4} />
-
-          <pointLight
-            position={[3, 3, 3]}
-            intensity={15}
-          />
-
-          <ParticleField />
-
-          <Float
-  speed={1.2}
-  rotationIntensity={0.15}
-  floatIntensity={0.25}
->
-  <F1Car />
-</Float>
-
-          <Particles />
-
-          <OrbitControls
-            enableZoom={false}
-            enablePan={false}
-          />
-
+          camera={{
+            position: [0, 0, 5],
+            fov: 45,
+          }}
+          gl={{
+            alpha: true,
+            antialias: true,
+          }}
+          dpr={[1, 2]}
+        >
+          <Scene
+  scrollProgress={scrollProgress}
+/>
         </Canvas>
       </div>
-
     </section>
   );
 }
+
