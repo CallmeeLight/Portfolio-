@@ -1,4 +1,3 @@
-import F1Car from "./F1Car";
 import React, { useRef, useEffect } from "react";
 import ParticleField from "./ParticleField";
 import {
@@ -224,56 +223,12 @@ function Particles() {
   );
 }
 
-/* =========================
-   SCROLL CAR
-========================= */
-
-function ScrollCar({ progress }) {
-  const group = useRef();
-
-  useFrame(() => {
-    if (!group.current) return;
-
-    const targetY = -progress * 2.8;
-    const targetX = progress * 1.2;
-    const targetZ = progress * -1.2;
-
-    group.current.position.y +=
-      (targetY - group.current.position.y) * 0.08;
-
-    group.current.position.x +=
-      (targetX - group.current.position.x) * 0.08;
-
-    group.current.position.z +=
-      (targetZ - group.current.position.z) * 0.08;
-
-    const targetRotationY = progress * 0.7;
-
-    group.current.rotation.y +=
-      (targetRotationY - group.current.rotation.y) * 0.08;
-
-    const targetScale = 1 - progress * 0.35;
-
-    const currentScale =
-      group.current.scale.x +
-      (targetScale - group.current.scale.x) * 0.08;
-
-    group.current.scale.setScalar(currentScale);
-  });
-
-  return (
-    <group ref={group}>
-      <F1Car />
-    </group>
-  );
-}
-
-
+  
 /* =========================
    SCENE
 ========================= */
 
-function Scene({ scrollProgress }) {
+function Scene() {
   return (
     <>
       <ambientLight intensity={0.4} />
@@ -285,15 +240,12 @@ function Scene({ scrollProgress }) {
 
       <ParticleField />
 
-      <ScrollCar progress={scrollProgress} />
-
       <Particles />
 
       <OrbitControls
         enableZoom={false}
         enablePan={false}
       />
-
     </>
   );
 }
@@ -307,66 +259,134 @@ export default function Hero() {
   const heroText = useRef();
   const hero = useRef();
 
-    const [scrollProgress, setScrollProgress] =
-  React.useState(0);
+  const terminal = useRef();
+const terminalCommand = useRef();
+const terminalOutput = useRef();
+const fakeCursor = useRef();
 
   /* HERO INTRO */
 
   useEffect(() => {
-    if (!heroText.current) return;
+  const ctx = gsap.context(() => {
+    const command = "print('Hi, I'm Light.')";
+    const tl = gsap.timeline();
 
-    gsap.fromTo(
+    // Terminal enters
+    tl.fromTo(
+      terminal.current,
+      {
+        opacity: 0,
+        scale: 0.92,
+        y: 25,
+      },
+      {
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        duration: 0.7,
+        ease: "power3.out",
+      }
+    );
+
+    // Type command
+    tl.to(
+      {},
+      {
+        duration: command.length * 0.07,
+        ease: "none",
+        onUpdate: function () {
+          const progress = this.progress();
+          const count = Math.floor(
+            progress * command.length
+          );
+
+          terminalCommand.current.textContent =
+            command.slice(0, count);
+        },
+      }
+    );
+
+    // Small pause
+    tl.to({}, { duration: 0.25 });
+
+    // Cursor moves to command
+    tl.to(fakeCursor.current, {
+      x: 145,
+      y: -2,
+      duration: 0.5,
+      ease: "power2.inOut",
+    });
+
+    // Click
+    tl.to(fakeCursor.current, {
+      scale: 0.75,
+      duration: 0.08,
+    });
+
+    tl.to(fakeCursor.current, {
+      scale: 1,
+      duration: 0.12,
+    });
+
+    // Output
+    tl.to(terminalOutput.current, {
+      opacity: 1,
+      duration: 0.25,
+    });
+
+    // Let user see output
+    tl.to({}, { duration: 0.9 });
+
+    // Terminal exits
+    tl.to(terminal.current, {
+      opacity: 0,
+      scale: 1.05,
+      y: -25,
+      duration: 0.8,
+      ease: "power3.inOut",
+    });
+
+    // Hero appears
+    tl.set(heroText.current, {
+      visibility: "visible",
+    });
+
+    tl.fromTo(
       heroText.current.children,
       {
         opacity: 0,
-        y: 40,
+        y: 45,
+        filter: "blur(12px)",
       },
       {
         opacity: 1,
         y: 0,
+        filter: "blur(0px)",
         duration: 1,
         stagger: 0.15,
         ease: "power3.out",
       }
     );
-  }, []);
 
-  /* =========================
-     CINEMATIC SCROLL
-  ========================= */
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!hero.current) return;
-
-      const rect =
-        hero.current.getBoundingClientRect();
-
-      const progress = THREE.MathUtils.clamp(
-        -rect.top / window.innerHeight,
-        0,
-        1
-      );
-
-      setScrollProgress(progress);
-
-    };
-
-    window.addEventListener(
-      "scroll",
-      handleScroll,
-      { passive: true }
+    // Buttons
+    tl.fromTo(
+      ".hero-buttons",
+      {
+        opacity: 0,
+        y: 20,
+      },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: "power3.out",
+      },
+      "-=0.5"
     );
+  });
 
-    handleScroll();
-
-    return () => {
-      window.removeEventListener(
-        "scroll",
-        handleScroll
-      );
-    };
-  }, []);
+  return () => ctx.revert();
+}, []);
 
   return (
     <section
@@ -374,6 +394,34 @@ export default function Hero() {
   className="hero"
   ref={hero}
 >
+
+  {/* TERMINAL INTRO */}
+<div className="terminal-intro" ref={terminal}>
+  <div className="terminal-window">
+    <div className="terminal-header">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <div className="terminal-body">
+      <div>
+        <span className="terminal-prompt">$ </span>
+        <span ref={terminalCommand}></span>
+        <span className="terminal-caret">▋</span>
+      </div>
+
+      <div className="terminal-output" ref={terminalOutput}>
+        <div> Running Command...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div className="fake-cursor" ref={fakeCursor}>
+  ↖
+</div>
+
       {/* =========================
           HERO TEXT
       ========================= */}
@@ -387,8 +435,12 @@ export default function Hero() {
         </p>
 
         <h1>
-          Hi, I'm <span>Light.</span>
-        </h1>
+  Hi, I'm{" "}
+  <span className="light-name">
+    Light.
+    <span className="hero-cursor">|</span>
+  </span>
+</h1>
 
         <p className="subtitle">
           I build intelligent digital experiences
@@ -432,9 +484,7 @@ export default function Hero() {
           }}
           dpr={[1, 2]}
         >
-          <Scene
-  scrollProgress={scrollProgress}
-/>
+          <Scene />
         </Canvas>
       </div>
     </section>
