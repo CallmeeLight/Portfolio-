@@ -2743,3 +2743,7 @@ footer {
     opacity: 0;
   }
 }
+
+.orb {
+  touch-action: pan-y;
+}
