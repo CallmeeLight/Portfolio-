@@ -241,12 +241,6 @@ function Scene() {
       <ParticleField />
 
       <Particles />
-
-      <OrbitControls
-  enableZoom={false}
-  enablePan={false}
-  enableRotate={window.innerWidth > 768}
-/>
     </>
   );
 }
